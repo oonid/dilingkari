@@ -5,6 +5,13 @@ api_version: 1
 threadsafe: yes
 
 handlers:
+- url: /(.*\.(gif|png|jpg))$
+  static_files: static/\1
+  upload: static/.*\.(gif|png|jpg)$
+- url: /p/.*
+  script: api_profile.app
+- url: /a/.*
+  script: api_activity.app
 - url: .*
   script: dilingkari.app
 
