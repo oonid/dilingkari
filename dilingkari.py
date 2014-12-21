@@ -1,7 +1,9 @@
 from flask import Flask
-
+from google.appengine.api import urlfetch
 import jinja2
 import os
+import urllib
+import simplejson as json
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -16,11 +18,19 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 @app.route('/index')
 def index():
     output_str = '<h1>Hello World!</h1>'
-    gplus_ids = ['116709755762272494241', '102354805749063623353']
-    for gplus_id in gplus_ids:
-        output_str += gplus_id + '<br/>'
+    form_fields = { "nitems": "all", }
+    form_data = urllib.urlencode(form_fields)
+    result = urlfetch.fetch(url='http://dilingkari.appspot.com/indonesia',
+                        payload=form_data,
+                        method=urlfetch.POST,
+                        headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                        deadline=60)
+    users = []
+    if result.status_code == 200:
+        users = json.loads(result.content)
     template_values = {
         'body_text': output_str,
+        'users': users
     }
     template = JINJA_ENVIRONMENT.get_template('index.html')        
     return template.render(template_values)

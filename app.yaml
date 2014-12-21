@@ -12,6 +12,8 @@ handlers:
   script: api_profile.app
 - url: /a/.*
   script: api_activity.app
+- url: /indonesia
+  script: api_indonesia.app
 - url: .*
   script: dilingkari.app
 

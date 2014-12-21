@@ -5,7 +5,8 @@ http://dilingkari.appspot.com
 http://di.lingkari.com
 
 Open Terminal
-$ pip install -r requirements.txt -t lib/
+
++ $ pip install -r requirements.txt -t lib/
 
 Open Project on Developer Console
 
