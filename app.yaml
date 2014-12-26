@@ -10,8 +10,6 @@ handlers:
   upload: static/.*\.(gif|png|jpg)$
 - url: /p
   script: api_profile.app
-- url: /p/.*
-  script: api_profile.app
 - url: /a/.*
   script: api_activity.app
 - url: /indonesia
