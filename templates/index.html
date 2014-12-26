@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% autoescape on %}
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
@@ -17,11 +17,20 @@
 </head>
 <body>
 {{ body_text|safe }}
-{% for user in users %}
-    <div><p><img src="{{ user.image.url }}" /> <a href="http://plus.google.com/{{ user.id }}">{{ user.displayName }}</a>: {{ user.last_activity }}</p></div>
-{% endfor %}
+<table>
+    {% for user in users %}
+    <tr>
+        <td rowspan="2"><img src="{{ user.image.url }}" /></td>
+        <td><a href="http://plus.google.com/{{ user.id }}">{{ user.displayName }}</a></td>
+    </tr>
+    <tr>
+        <td>{{ user.last_activity }}</td>
+    </tr>
+    {% endfor %}
+</table>
 <p>&nbsp;</p>
-<p>created by <a href="http://google.com/+oonarfiandwi"><strong>OonID</strong></a> as open source project at <a href="http://github.com/oonid/dilingkari/">github</a></p>
+<p>created by <a href="http://google.com/+oonarfiandwi"><strong>OonID</strong></a> as open source project at <a href="http://github.com/oonid/dilingkari/">github</a><br/>
+data top Indonesian profiles by <a href="http://circlecount.com/id/profileslist/">CircleCount</a>.</p>
 </body>
 </html>
 {% endautoescape %}

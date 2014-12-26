@@ -25,7 +25,7 @@ API_INDONESIA = 'http://dilingkari.appspot.com/indonesia'
 @app.route('/')
 @app.route('/index')
 def index():
-    output_str = '<h1>Hello World!</h1>'
+    output_str = '<h2>Orang Indonesia, aktif di Google+!</h2>'
     form_fields = { "nitems": "all", }
     form_data = urllib.urlencode(form_fields)
     result = urlfetch.fetch(url=API_INDONESIA, payload=form_data, method=urlfetch.POST,

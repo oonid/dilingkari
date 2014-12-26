@@ -12,6 +12,8 @@ Open Project on Developer Console
 
 + activate Google+ API
 
++ edit dilingkari.py change API_INDONESIA to your own URL
+
 TODO:
 
 1. we don't need jinja2 and markupsafe because already available on App Engine, so you can delete it.
