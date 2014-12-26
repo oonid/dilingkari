@@ -18,7 +18,7 @@
 <body>
 {{ body_text|safe }}
 {% for user in users %}
-    <div><p><img src="{{ user.image.url }}" /> {{ user.displayName }}: {{ user.id }} <a href="/a/{{ user.id }}">activity</a></p></div>
+    <div><p><img src="{{ user.image.url }}" /> <a href="http://plus.google.com/{{ user.id }}">{{ user.displayName }}</a>: {{ user.last_activity }}</p></div>
 {% endfor %}
 <p>&nbsp;</p>
 <p>created by <a href="http://google.com/+oonarfiandwi"><strong>OonID</strong></a> as open source project at <a href="http://github.com/oonid/dilingkari/">github</a></p>

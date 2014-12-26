@@ -28,7 +28,7 @@ def index():
     output_str = '<h1>Hello World!</h1>'
     form_fields = { "nitems": "all", }
     form_data = urllib.urlencode(form_fields)
-    result = urlfetch.fetch(url=API_INDONESIA, payload=form_data, method=urlfetch.POST, 
+    result = urlfetch.fetch(url=API_INDONESIA, payload=form_data, method=urlfetch.POST,
                             headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
     users = []
     if result.status_code == 200:
@@ -37,7 +37,7 @@ def index():
         'body_text': output_str,
         'users': users
     }
-    template = JINJA_ENVIRONMENT.get_template('index.html')        
+    template = JINJA_ENVIRONMENT.get_template('index.html')
     return template.render(template_values)
 
 

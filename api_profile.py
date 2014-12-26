@@ -1,7 +1,6 @@
 __author__ = 'oonarfiandwi'
 
-from flask import Flask
-from flask import request
+from flask import Flask, request
 from oauth2client.appengine import AppAssertionCredentials
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
