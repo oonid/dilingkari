@@ -8,10 +8,10 @@
 <body>
 {{ body_text|safe }}
 {% for user in users %}
-    <div><p>{{ user.displayName }}: {{ user.id }} <a href="/p/{{ user.id }}">profile</a> <a href="/a/{{ user.id }}">activity</a></p></div>
+    <div><p><img src="{{ user.image.url }}" /> {{ user.displayName }}: {{ user.id }} <a href="/a/{{ user.id }}">activity</a></p></div>
 {% endfor %}
 <p>&nbsp;</p>
-<p>created by <a href="http://google.com/+oonarfiandwi"><strong>oon arfiandwi</strong></a> as open source project at <a href="http://github.com/oonid/dilingkari/">github</a></p>
+<p>created by <a href="http://google.com/+oonarfiandwi"><strong>OonID</strong></a> as open source project at <a href="http://github.com/oonid/dilingkari/">github</a></p>
 </body>
 </html>
 {% endautoescape %}

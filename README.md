@@ -4,7 +4,7 @@ http://dilingkari.appspot.com
 
 http://di.lingkari.com
 
-Open Terminal
+Open Terminal (if lib directory is empty or not complete)
 
 + $ pip install -r requirements.txt -t lib/
 
