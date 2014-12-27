@@ -14,6 +14,8 @@ handlers:
   script: api_activity.app
 - url: /indonesia
   script: api_indonesia.app
+- url: /count_indonesia
+  script: api_indonesia.app
 - url: /cron_indonesia
   script: cron_indonesia.app
 - url: .*

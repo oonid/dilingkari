@@ -1,6 +1,6 @@
 __author__ = 'oonarfiandwi'
 
-from flask import Flask
+from flask import Flask, request
 from google.appengine.api import urlfetch
 import jinja2
 import os
@@ -20,13 +20,24 @@ you should consider to deploy this to other project (instance),
 change this URL to your own project URL
 """
 API_INDONESIA = 'http://dilingkari.appspot.com/indonesia'
+COUNT_INDONESIA = 'http://dilingkari.appspot.com/count_indonesia'
 
 
 @app.route('/')
 @app.route('/index')
 def index():
-    output_str = '<h2>Orang Indonesia, aktif di Google+!</h2>'
-    form_fields = { "nitems": "all", }
+    nitems = '21'
+    page = request.args.get('p', '1')
+    output_str = 'yang aktif di Google+'
+    form_fields = {'nitems': nitems, 'page': page}
+    form_data = urllib.urlencode(form_fields)
+    result_count_indonesia = urlfetch.fetch(url=COUNT_INDONESIA, payload=form_data, method=urlfetch.POST,
+                                     headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
+    count_indonesia = long(result_count_indonesia.content)
+    count = 1
+    if count_indonesia > long(nitems):
+        count = 1 + int(count_indonesia / long(nitems))
+    form_fields = {'nitems': nitems, 'page': page}
     form_data = urllib.urlencode(form_fields)
     result = urlfetch.fetch(url=API_INDONESIA, payload=form_data, method=urlfetch.POST,
                             headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
@@ -35,7 +46,10 @@ def index():
         users = json.loads(result.content)
     template_values = {
         'body_text': output_str,
-        'users': users
+        'users': users,
+        'page': int(page),
+        'last_page': count,
+        'base_url': request.base_url
     }
     template = JINJA_ENVIRONMENT.get_template('index.html')
     return template.render(template_values)

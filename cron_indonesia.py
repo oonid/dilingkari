@@ -12,5 +12,5 @@ def cron_indonesia():
     instance dilingkari.appspot.com will not serve cron to preserve quota usage
     """
     if not 'dilingkari.appspot.com' in request.url_root:
-        taskqueue.add(url='/indonesia', params={'nitems': 'all'}, method="POST")
+        taskqueue.add(url='/indonesia', params={'nitems': '1', 'page': '1'}, method="POST")
     return ''

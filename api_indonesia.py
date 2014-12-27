@@ -5,10 +5,12 @@ from flask import request
 from oauth2client.appengine import AppAssertionCredentials
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
+from google.appengine.ext.db import stats
 from model_profile import Profile
 from datetime import datetime, timedelta
 
 import simplejson as json
+import re
 
 """
 this should be data from another API (contact circlecount? http://www.circlecount.com/id/profileslist/)
@@ -20,7 +22,12 @@ indonesia_ids = \
      '112638457196220461637', '101810166866201144931', '106939868938222633265', '102822538152349669747',
      '107507070338583266314', '102024051895024187351', '117108236116237500441', '118214294405590069582',
      '105628667513453263078', '113811258740009429740', '104954947323368041426', '118343307903587596704',
+     '101778343594604092334', '105924429773397501596', '111156704479775949627', '104879387838839120510',
+     '102250841784466654092', '113014617490520808583', '101928252051944612621', '101682734905774807138',
+     '104357255131643322237', '102802823311284245007', '105687286181087087938', '106481269342600411633',
+     '104689423159256002886',
      '102354805749063623353',  # google.com/+oonarfiandwi
+     '108287824657082742169',  # google.com/+eunikekartini
      ]
 
 data_expired_time_in_seconds = 60 * len(indonesia_ids)
@@ -37,6 +44,11 @@ def get_indonesia():
     """
     if 'dilingkari.appspot.com' in request.url_root:
         return '[]'
+    nitems = int(request.form['nitems'])
+    page = int(request.form['page'])
+    offset = 0
+    if page > 0:
+        offset = (page-1) * nitems
     # process phase 1 (update database)
     for profile_id in indonesia_ids:
         # request to ndb
@@ -65,7 +77,7 @@ def get_indonesia():
                 taskqueue.add(url='/a', params={'id': profile_id})
 
     # process phase 2 (response with data from Datastore)
-    profiles = Profile.query().order(-Profile.activity_updated)
+    profiles = Profile.query().order(-Profile.activity_updated).fetch(nitems, offset=offset)
     indonesia_users = []
     for profile in profiles:
         # 'updated' is field from Google+ API activities related to specified user
@@ -77,12 +89,28 @@ def get_indonesia():
         # user profile is a return of Google+ API people
         user_profile = json.loads(profile.user_data)
         if user_profile is not None:
+            user_image = user_profile['image']
+            m = re.search('(.*)\?sz=(\d+)', user_image['url'])
+            if m:
+                user_image['url'] = m.group(1) + '?sz=350'  # change image size to 350
             user_dict = {'displayName': user_profile['displayName'], 'id': user_profile['id'],
-                         'name': user_profile['name'], 'image': user_profile['image'],
+                         'name': user_profile['name'], 'image': user_image,
                          'last_activity': last_activity}
             indonesia_users.append(user_dict)
 
     return json.dumps(indonesia_users)
+
+
+@app.route('/count_indonesia', methods=['POST'])
+def count_indonesia():
+    """
+    instance dilingkari.appspot.com will not serve /count_indonesia to preserve quota usage
+    """
+    if 'dilingkari.appspot.com' in request.url_root:
+        return '0'
+    nitems = int(request.form['nitems'])
+    kind_stats = stats.KindStat().all().filter("kind_name =", "Profile").get()
+    return str(kind_stats.count)
 
 
 def get_delta(updated_datetime):
@@ -104,9 +132,9 @@ def get_delta(updated_datetime):
         text += str(mins) + ' minutes '
     elif mins == 1:
         text += '1 minute '
-    if secs > 1:
-        text += str(secs) + ' seconds '
-    elif secs == 1:
-        text += '1 second '
+    #if secs > 1:
+    #    text += str(secs) + ' seconds '
+    #elif secs == 1:
+    #    text += '1 second '
     text += 'ago.'
     return text
