@@ -4,22 +4,31 @@ runtime: python27
 api_version: 1
 threadsafe: yes
 
+env_variables:
+  WEB_INSTANCE: 'dilingkari.appspot.com'
+  DB_INSTANCE: 'dilingkari.appspot.com'
+  API_INSTANCE: 'dilingkari.appspot.com'
+
 handlers:
-- url: /(.*\.(gif|png|jpg))$
+- url: /(.*\.(gif|png|jpg|ico))$
   static_files: static/\1
-  upload: static/.*\.(gif|png|jpg)$
+  upload: static/.*\.(gif|png|jpg|ico)$
 - url: /p
+  script: api_profile.app
+- url: /p/.*
   script: api_profile.app
 - url: /a
   script: api_activity.app
+- url: /a/.*
+  script: api_activity.app
 - url: /indonesia
-  script: api_indonesia.app
+  script: db_indonesia.app
 - url: /count_indonesia
-  script: api_indonesia.app
+  script: db_indonesia.app
 - url: /cron_indonesia
-  script: cron_indonesia.app
+  script: db_cron_indonesia.app
 - url: .*
-  script: dilingkari.app
+  script: web_dilingkari.app
 
 libraries:
 - name: jinja2

@@ -2,10 +2,11 @@ __author__ = 'oonarfiandwi'
 
 from flask import Flask, request
 from google.appengine.api import urlfetch
+
 import jinja2
-import os
 import urllib
 import simplejson as json
+import os
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -18,9 +19,10 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 """
 you should consider to deploy this to other project (instance),
 change this URL to your own project URL
+DB_INSTANCE environment variable defined at app.yaml
 """
-API_INDONESIA = 'http://dilingkari.appspot.com/indonesia'
-COUNT_INDONESIA = 'http://dilingkari.appspot.com/count_indonesia'
+API_INDONESIA = 'http://' + os.environ['DB_INSTANCE'] + '/indonesia'
+COUNT_INDONESIA = 'http://' + os.environ['DB_INSTANCE'] + '/count_indonesia'
 
 
 @app.route('/')

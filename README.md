@@ -4,6 +4,11 @@
 
 The live version of the project accessible via http://di.lingkari.com (an alias version of http://dilingkari.appspot.com)
 
+ --------------     -------------     -------------     -------
+ | WEB        |-----| DB        |-----| API       |-----| G+  |
+ | dilingkari |     | Datastore |     | Interface |     | API |
+ --------------     -------------     -------------     -------
+
 Here's how you can rebuild the app (or if you IntelliJ IDEA user, refer to [1]):
 
 Open Terminal (if lib directory is empty or not complete)

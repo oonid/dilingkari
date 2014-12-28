@@ -60,7 +60,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">dilingkari di Google+</a>
+                <a class="navbar-brand" href="{{ base_url }}">dilingkari di Google+</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -105,7 +105,12 @@
                         <img class="img-responsive" src="{{ user.image.url }}" alt="">
                     </a>
                     <h3>
-                        <a href="http://plus.google.com/{{ user.id }}/posts">{{ user.displayName }}</a>
+                        {% if user.verified == True %}
+                            <a href="http://plus.google.com/{{ user.id }}/posts">{{ user.displayName }}</a>
+                            <img class="pull-right" src="/verified17.png" alt="verified">
+                        {% else %}
+                            <a href="http://plus.google.com/{{ user.id }}/posts">{{ user.displayName }}</a>
+                        {% endif %}
                     </h3>
                     <p>Last post {{ user.last_activity }}</p>
                 </div>
