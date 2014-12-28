@@ -4,10 +4,9 @@
 
 The live version of the project accessible via http://di.lingkari.com (an alias version of http://dilingkari.appspot.com)
 
- --------------     -------------     -------------     -------
- | WEB        |-----| DB        |-----| API       |-----| G+  |
- | dilingkari |     | Datastore |     | Interface |     | API |
- --------------     -------------     -------------     -------
+ -------     ------     -----------------     ----------
+ | WEB |-----| DB |-----| API Interface |-----| G+ API |
+ -------     ------     -----------------     ----------
 
 Here's how you can rebuild the app (or if you IntelliJ IDEA user, refer to [1]):
 
