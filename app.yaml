@@ -5,7 +5,7 @@ api_version: 1
 threadsafe: yes
 
 env_variables:
-  WEB_INSTANCE: 'dilingkari.appspot.com'
+  WEB_INSTANCE: 'di.lingkari.com'
   DB_INSTANCE: 'dilingkari.appspot.com'
   API_INSTANCE: 'dilingkari.appspot.com'
 
@@ -27,6 +27,10 @@ handlers:
   script: db_indonesia.app
 - url: /cron_indonesia
   script: db_cron_indonesia.app
+- url: /profile
+  script: db_profile.app
+- url: /profile/.*
+  script: web_dilingkari.app
 - url: .*
   script: web_dilingkari.app
 

@@ -1,18 +1,19 @@
 __author__ = 'oonarfiandwi'
 
 from flask import Flask, request
-from google.appengine.api import urlfetch
+from google.appengine.api import urlfetch, memcache
+from os import path, environ
 
 import jinja2
 import urllib
 import simplejson as json
-import os
+import logging
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
 JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+    loader=jinja2.FileSystemLoader(path.join(path.dirname(__file__), 'templates')),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
@@ -20,9 +21,11 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 you should consider to deploy this to other project (instance),
 change this URL to your own project URL
 DB_INSTANCE environment variable defined at app.yaml
+beware that WEB_INSTANCE is multiple domain name
 """
-API_INDONESIA = 'http://' + os.environ['DB_INSTANCE'] + '/indonesia'
-COUNT_INDONESIA = 'http://' + os.environ['DB_INSTANCE'] + '/count_indonesia'
+DB_PROFILE = 'http://' + environ['DB_INSTANCE'] + '/profile'
+DB_INDONESIA = 'http://' + environ['DB_INSTANCE'] + '/indonesia'
+COUNT_DB_INDONESIA = 'http://' + environ['DB_INSTANCE'] + '/count_indonesia'
 
 
 @app.route('/')
@@ -33,19 +36,28 @@ def index():
     output_str = 'yang aktif di Google+'
     form_fields = {'nitems': nitems, 'page': page}
     form_data = urllib.urlencode(form_fields)
-    result_count_indonesia = urlfetch.fetch(url=COUNT_INDONESIA, payload=form_data, method=urlfetch.POST,
-                                     headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
+    result_count_indonesia = urlfetch.fetch(url=COUNT_DB_INDONESIA, payload=form_data, method=urlfetch.POST,
+                                            headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
     count_indonesia = long(result_count_indonesia.content)
     count = 1
     if count_indonesia > long(nitems):
         count = 1 + int(count_indonesia / long(nitems))
-    form_fields = {'nitems': nitems, 'page': page}
-    form_data = urllib.urlencode(form_fields)
-    result = urlfetch.fetch(url=API_INDONESIA, payload=form_data, method=urlfetch.POST,
-                            headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
+
     users = []
-    if result.status_code == 200:
-        users = json.loads(result.content)
+    # try to load data from memcache
+    users_json = memcache.get('users_content:%s:%s' % (nitems, page))
+    if users_json is None:
+        form_fields = {'nitems': nitems, 'page': page}
+        form_data = urllib.urlencode(form_fields)
+        result = urlfetch.fetch(url=DB_INDONESIA, payload=form_data, method=urlfetch.POST,
+                                headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
+        if result.status_code == 200:
+            users = json.loads(result.content)
+            if not memcache.add('users_content:%s:%s' % (nitems, page), result.content, 300):  # 300 seconds
+                logging.error('Memcache set failed: users_content:%s:%s' % (nitems, page))
+    else:
+        users = json.loads(users_json)
+
     template_values = {
         'body_text': output_str,
         'users': users,
@@ -55,6 +67,19 @@ def index():
     }
     template = JINJA_ENVIRONMENT.get_template('index.html')
     return template.render(template_values)
+
+
+@app.route('/profile/<profile_id>')
+def profile(profile_id):
+    form_fields = {'id': profile_id}
+    form_data = urllib.urlencode(form_fields)
+    result = urlfetch.fetch(url=DB_PROFILE, payload=form_data, method=urlfetch.POST,
+                            headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
+    activity_data = ''
+    if result.status_code == 200:
+        activity_data = result.content
+            
+    return activity_data
 
 
 @app.errorhandler(404)

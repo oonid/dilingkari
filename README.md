@@ -14,13 +14,13 @@ Open Terminal (if lib directory is empty or not complete)
 
 + $ pip install -r requirements.txt -t lib/
 
-Open Project on Developer Console
+Open (or create) Project on Developer Console
 
 + activate Google+ API
 
-+ edit dilingkari.py change API_INDONESIA to your own URL
++ put the App ID to file app.yaml, section application and env_variable (URL with appspot.com)
 
-TODO:
+what you should do with the project files on lib directory:
 
 1. we don't need jinja2 and markupsafe because already available on App Engine, so you can delete it.
 

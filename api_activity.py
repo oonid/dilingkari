@@ -45,7 +45,6 @@ def get_activity(profile_id):
         service_http = discovery.build("plus", "v1", http=http)
         activities = service_http.activities().list(userId=profile_id, collection='public').execute(http=http)
         updated = activities.get('updated')
-        updated_datetime = datetime.strptime(updated, '%Y-%m-%dT%H:%M:%S.%fZ')
         activities_json = json.dumps(activities)
 
         key = ndb.Key(Profile, profile_id)
@@ -57,8 +56,9 @@ def get_activity(profile_id):
                                    activity_lastupdate=datetime.now())
             else:
                 user_profile.activity_data = activities_json
-                user_profile.activity_updated = updated_datetime
                 user_profile.activity_lastupdate = datetime.now()
+                if updated is not None:
+                    user_profile.activity_updated = datetime.strptime(updated, '%Y-%m-%dT%H:%M:%S.%fZ')
             user_profile.put()
 
         update_profile()
