@@ -26,6 +26,7 @@ beware that WEB_INSTANCE is multiple domain name
 DB_PROFILE = 'http://' + environ['DB_INSTANCE'] + '/profile'
 DB_INDONESIA = 'http://' + environ['DB_INSTANCE'] + '/indonesia'
 COUNT_DB_INDONESIA = 'http://' + environ['DB_INSTANCE'] + '/count_indonesia'
+UPDATE_DB_INDONESIA = 'http://' + environ['DB_INSTANCE'] + '/update_db_indonesia'
 
 
 @app.route('/')
@@ -34,6 +35,7 @@ def index():
     nitems = '21'
     page = request.args.get('p', '1')
     output_str = 'yang aktif di Google+'
+    
     form_fields = {'nitems': nitems, 'page': page}
     form_data = urllib.urlencode(form_fields)
     result_count_indonesia = urlfetch.fetch(url=COUNT_DB_INDONESIA, payload=form_data, method=urlfetch.POST,
@@ -47,8 +49,6 @@ def index():
     # try to load data from memcache
     users_json = memcache.get('users_content:%s:%s' % (nitems, page))
     if users_json is None:
-        form_fields = {'nitems': nitems, 'page': page}
-        form_data = urllib.urlencode(form_fields)
         result = urlfetch.fetch(url=DB_INDONESIA, payload=form_data, method=urlfetch.POST,
                                 headers={'Content-Type': 'application/x-www-form-urlencoded'}, deadline=60)
         if result.status_code == 200:

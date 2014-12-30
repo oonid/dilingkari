@@ -12,5 +12,5 @@ app.config['DEBUG'] = True
 def cron_indonesia():
     """ only DB_INSTANCE serve cron to preserve quota usage """
     if os.environ['DB_INSTANCE'] in request.url_root:
-        taskqueue.add(url='/indonesia', params={'nitems': '1', 'page': '1'}, method="POST")
+        taskqueue.add(url='/update_db_indonesia', params={'nitems': '1', 'page': '1'}, method="POST")
     return ''

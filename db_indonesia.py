@@ -11,7 +11,6 @@ from os import environ
 from logging import error
 
 import simplejson as json
-import re
 
 """
 this should be data from another API (contact circlecount? http://www.circlecount.com/id/profileslist/)
@@ -42,6 +41,10 @@ indonesia_ids = \
      '114673087345260135832', '103112988688147257701', '102185792362815488008', '110164135613724623208',
      '100575364581092867206', '101874797485064592775', '109128804280051726481', '117823130965889718161',
      '116430720068309201654', '111774305345889696894', '106323274296699264295', '116418544068626962508',
+     '100652824519298040016', '101249952574241217402', '116729759094961531076', '102979881173826058281',
+     '101898587084201015993', '116610801738829783940', '105887489575344254572', '108831587043640764362',
+     '105810954071112361976', '103105202350431983844', '101981660178179618739', '101701920696045165687',
+     '112669538420258358861', '100100066894130591020', '113353870864715471985', '100353356311983330157',
      '103164032603442685281',  # tikabanget
      '102354805749063623353',  # google.com/+oonarfiandwi
      '108287824657082742169',  # google.com/+eunikekartini
@@ -71,38 +74,9 @@ def get_indonesia():
     offset = 0
     if page > 0:
         offset = (page-1) * nitems
+
     # process phase 1 (update database)
-    for profile_id in indonesia_ids:
-        # request to memcache and ndb
-        profile = deserialize_entities(memcache.get('profile:%s' % profile_id))
-        if profile is None:
-            profile = ndb.Key(Profile, profile_id).get()
-            if profile is not None:  # None in memcache, but not None on datastore
-                if not memcache.add('profile:%s' % profile_id, serialize_entities(profile), 600):  # 600 seconds
-                    error('Memcache set failed: profile:%s' % profile_id)
-
-        if profile is None:  # None in Datastore
-            # Add the task to the default queue.
-            taskqueue.add(url=TQ_URL_PROFILE, params={'id': profile_id})
-            taskqueue.add(url=TQ_URL_ACTIVITY, params={'id': profile_id})
-        else:
-            # check if the database is expired? update via taskqueue if database expired
-            user_lastupdate = profile.user_lastupdate
-            if user_lastupdate is None:
-                user_lastupdate = datetime.now() - timedelta(seconds=(profile_expired_time_in_seconds+1))
-            user_delta = datetime.now() - user_lastupdate
-            if user_delta.total_seconds() > profile_expired_time_in_seconds:
-                # Add the task to the default queue after expired
-                taskqueue.add(url=TQ_URL_PROFILE, params={'id': profile_id})
-
-            # check if the database is expired? update via taskqueue if database expired
-            activity_lastupdate = profile.activity_lastupdate
-            if activity_lastupdate is None:
-                activity_lastupdate = datetime.now() - timedelta(seconds=(activity_expired_time_in_seconds+1))
-            activity_delta = datetime.now() - activity_lastupdate
-            if activity_delta.total_seconds() > activity_expired_time_in_seconds:
-                # Add the task to the default queue after expired
-                taskqueue.add(url=TQ_URL_ACTIVITY, params={'id': profile_id})
+    # now handled by cron per 10 minutes
 
     # process phase 2 (response with data from memcache or Datastore)
     # unfortunately total data from Datastore is bigger than max allowed on memcache (1MB)
@@ -116,19 +90,32 @@ def get_indonesia():
 
     indonesia_users = []
     for profile in profiles:
+        # get data from memcache or datastore for specific user
+        p = get_profile(profile.key.id())
+        
         # 'updated' is field from Google+ API activities related to specified user
         last_activity = '(unknown)'
         activity_updated = profile.activity_updated
         if activity_updated is not None:
-            last_activity = get_last_activity(profile.key.string_id())
+            last_activity = get_delta(activity_updated)
+            if p.activity_data is not None:
+                activity_data = json.loads(p.activity_data)
+                items = activity_data['items']
+                #items = activity_data.get('items', [])
+                if len(items) > 0:
+                    item_object = items[0]['object']
+                    t_reshare = str(item_object['resharers']['totalItems'])
+                    t_plusone = str(item_object['plusoners']['totalItems'])
+                    t_comment = str(item_object['replies']['totalItems'])
+                    last_activity += '<br/>('+t_reshare+' reshares, '+t_plusone+' <b>+1</b>, '+t_comment+' comments)'
 
         # user profile is a return of Google+ API people
-        user_profile = get_user_data(profile.key.id())
+        user_profile = json.loads(p.user_data)
         if user_profile is not None:
             user_image = user_profile['image']
-            m = re.search('(.*)\?sz=(\d+)', user_image['url'])
-            if m:
-                user_image['url'] = m.group(1) + '?sz=350'  # change image size to 350
+            sz_index = user_image['url'].find('?sz=')
+            if sz_index > 0:
+                user_image['url'] = user_image['url'][:sz_index] + '?sz=350'  # change image size to 350
             user_dict = {'displayName': user_profile['displayName'], 'id': user_profile['id'],
                          'name': user_profile['name'], 'image': user_image, 'verified': user_profile['verified'],
                          'last_activity': last_activity}
@@ -137,7 +124,7 @@ def get_indonesia():
     return json.dumps(indonesia_users)
 
 
-def get_user_data(profile_id):
+def get_profile(profile_id):
     profile = deserialize_entities(memcache.get('profile:%s' % profile_id))
     if profile is None:
         profile = ndb.Key(Profile, profile_id).get()
@@ -145,37 +132,7 @@ def get_user_data(profile_id):
             if not memcache.add('profile:%s' % profile_id, serialize_entities(profile), 600):  # 600 seconds
                 error('Memcache set failed: profile:%s' % profile_id)
 
-    if profile is not None:
-        return json.loads(profile.user_data)
-
-    # else (None)
-    return None
-
-
-def get_last_activity(profile_id):
-    profile = deserialize_entities(memcache.get('profile:%s' % profile_id))
-    if profile is None:
-        profile = ndb.Key(Profile, profile_id).get()
-        if profile is not None:  # None in memcache, but not None on datastore
-            if not memcache.add('profile:%s' % profile_id, serialize_entities(profile), 600):  # 600 seconds
-                error('Memcache set failed: profile:%s' % profile_id)
-
-    if profile is not None:
-        activity_updated = profile.activity_updated
-        last_activity = get_delta(activity_updated)
-        activity_data = json.loads(profile.activity_data)
-        items = activity_data['items']
-        #items = activity_data.get('items', [])
-        if len(items) > 0:
-            item_object = items[0]['object']
-            t_reshare = str(item_object['resharers']['totalItems'])
-            t_plusone = str(item_object['plusoners']['totalItems'])
-            t_comment = str(item_object['replies']['totalItems'])
-            last_activity += '<br/>('+t_reshare+' reshares, '+t_plusone+' <b>+1</b>, '+t_comment+' comments)'
-        return last_activity
-
-    # else (None)
-    return '(unknown)'
+    return profile
 
 
 @app.route('/count_indonesia', methods=['POST'])
@@ -197,6 +154,49 @@ def count_indonesia():
 
     # else (not DB_INSTANCE)
     return '0'
+
+
+@app.route('/update_db_indonesia', methods=['POST'])
+def update_db_indonesia():
+    """ only DB_INSTANCE serve /update_db_indonesia to preserve quota usage """
+    if environ['DB_INSTANCE'] in request.url_root:
+        nitems = int(request.form['nitems'])
+        page = int(request.form['page'])
+
+        # process phase 1 (update database)
+        for profile_id in indonesia_ids:
+            # request to memcache and ndb
+            profile = deserialize_entities(memcache.get('profile:%s' % profile_id))
+            if profile is None:
+                profile = ndb.Key(Profile, profile_id).get()
+                if profile is not None:  # None in memcache, but not None on datastore
+                    if not memcache.add('profile:%s' % profile_id, serialize_entities(profile), 600):  # 600 seconds
+                        error('Memcache set failed: profile:%s' % profile_id)
+
+            if profile is None:  # None in Datastore
+                # Add the task to the default queue.
+                taskqueue.add(url=TQ_URL_PROFILE, params={'id': profile_id})
+                taskqueue.add(url=TQ_URL_ACTIVITY, params={'id': profile_id})
+            else:
+                # check if the database is expired? update via taskqueue if database expired
+                user_lastupdate = profile.user_lastupdate
+                if user_lastupdate is None:
+                    user_lastupdate = datetime.now() - timedelta(seconds=(profile_expired_time_in_seconds+1))
+                user_delta = datetime.now() - user_lastupdate
+                if user_delta.total_seconds() > profile_expired_time_in_seconds:
+                    # Add the task to the default queue after expired
+                    taskqueue.add(url=TQ_URL_PROFILE, params={'id': profile_id})
+
+                # check if the database is expired? update via taskqueue if database expired
+                activity_lastupdate = profile.activity_lastupdate
+                if activity_lastupdate is None:
+                    activity_lastupdate = datetime.now() - timedelta(seconds=(activity_expired_time_in_seconds+1))
+                activity_delta = datetime.now() - activity_lastupdate
+                if activity_delta.total_seconds() > activity_expired_time_in_seconds:
+                    # Add the task to the default queue after expired
+                    taskqueue.add(url=TQ_URL_ACTIVITY, params={'id': profile_id})
+
+    return '[]'
 
 
 def get_delta(updated_datetime):
@@ -224,7 +224,6 @@ def get_delta(updated_datetime):
     #    text += '1 second '
     text += 'ago.'
     return text
-
 
 
 """

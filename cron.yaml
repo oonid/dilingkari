@@ -1,4 +1,4 @@
 cron:
-- description: update database (even no visitor)
+- description: update database
   url: /cron_indonesia
-  schedule: every 1 hours
+  schedule: every 10 minutes

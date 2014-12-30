@@ -25,6 +25,8 @@ handlers:
   script: db_indonesia.app
 - url: /count_indonesia
   script: db_indonesia.app
+- url: /update_db_indonesia
+  script: db_indonesia.app
 - url: /cron_indonesia
   script: db_cron_indonesia.app
 - url: /profile
