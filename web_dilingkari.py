@@ -78,8 +78,14 @@ def profile(profile_id):
     activity_data = ''
     if result.status_code == 200:
         activity_data = result.content
-            
-    return activity_data
+
+    template_values = {
+        'id': profile_id,
+        'body_text': '',
+        'base_url': request.base_url
+    }
+    template = JINJA_ENVIRONMENT.get_template('profile.html')
+    return template.render(template_values)
 
 
 @app.errorhandler(404)

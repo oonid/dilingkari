@@ -9,6 +9,7 @@ from model_profile import Profile
 from datetime import datetime, timedelta
 from os import environ
 from logging import error
+from People import People
 
 import simplejson as json
 
@@ -45,9 +46,17 @@ indonesia_ids = \
      '101898587084201015993', '116610801738829783940', '105887489575344254572', '108831587043640764362',
      '105810954071112361976', '103105202350431983844', '101981660178179618739', '101701920696045165687',
      '112669538420258358861', '100100066894130591020', '113353870864715471985', '100353356311983330157',
+     '117762593332079535969', '107507539268974734333', '104707033302283722890', '111115958534146764360',
+     '107903295674078716857', '105154411599585458501', '111034269652878471427', '100816763676617074031',
+     '113906325992504847601', '116282402565362776252', '114210320721253434841', '116653828204029811729',
+     '115041340633616548475', '112878166140838268180', '116540026763084000945', '113576769754615264600',
+     '105751407373154489199',  # google.com/+AryanataRazki
+     '106180130032686806318',  # google.com/+intananggita
      '103164032603442685281',  # tikabanget
      '102354805749063623353',  # google.com/+oonarfiandwi
      '108287824657082742169',  # google.com/+eunikekartini
+     # verified users
+     '112630572986759127431', '107473738764732280406', '113731426897634311366',
      ]
 
 profile_expired_time_in_seconds = 60 * len(indonesia_ids)
@@ -110,14 +119,10 @@ def get_indonesia():
                     last_activity += '<br/>('+t_reshare+' reshares, '+t_plusone+' <b>+1</b>, '+t_comment+' comments)'
 
         # user profile is a return of Google+ API people
-        user_profile = json.loads(p.user_data)
-        if user_profile is not None:
-            user_image = user_profile['image']
-            sz_index = user_image['url'].find('?sz=')
-            if sz_index > 0:
-                user_image['url'] = user_image['url'][:sz_index] + '?sz=350'  # change image size to 350
-            user_dict = {'displayName': user_profile['displayName'], 'id': user_profile['id'],
-                         'name': user_profile['name'], 'image': user_image, 'verified': user_profile['verified'],
+        person = People(p.user_data)
+        if person is not None:
+            user_dict = {'displayName': person.displayName, 'id': person.id,
+                         'name': person.name, 'image': person.get_image(), 'verified': person.verified,
                          'last_activity': last_activity}
             indonesia_users.append(user_dict)
 
