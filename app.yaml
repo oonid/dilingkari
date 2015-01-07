@@ -23,7 +23,7 @@ handlers:
   script: api_activity.app
 - url: /indonesia
   script: db_indonesia.app
-- url: /count_indonesia
+- url: /verified_indonesia
   script: db_indonesia.app
 - url: /update_db_indonesia
   script: db_indonesia.app

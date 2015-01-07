@@ -30,3 +30,5 @@ UI with Twitter bootstrap, open source template from startbootstrap [2].
 
 [1]http://oo.or.id/content/python-web-sample-project-di-lingkari-com
 [2]http://startbootstrap.com/template-overviews/3-col-portfolio/
+
+![Alt text](http://7langit.com/dilingkari.png "Screenshot of Website (updated per hour)")

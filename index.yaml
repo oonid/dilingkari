@@ -1,0 +1,6 @@
+indexes:
+- kind: Profile
+  properties:
+  - name: user_is_verified
+  - name: activity_updated
+    direction: desc
