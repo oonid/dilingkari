@@ -4,6 +4,9 @@ from flask import Flask, request
 from google.appengine.api import urlfetch, memcache
 from os import path, environ
 
+from model_profile import Profile
+from google.appengine.ext import ndb
+
 import jinja2
 import urllib
 import simplejson as json
@@ -52,19 +55,22 @@ def index():
     else:
         users_data = json.loads(users_json)
 
-    count_indonesia = long(users_data['total_data'])
-    count = 1
-    if count_indonesia > long(nitems):
-        count = 1 + int(count_indonesia / long(nitems))
+    count = 0
+    users = []
+    if users_data:
+        count_indonesia = long(users_data['total_data'])
+        if count_indonesia > long(nitems):
+            count = 1 + int(count_indonesia / long(nitems))
 
-    users = users_data['paging_data']
+        users = users_data['paging_data']
 
     template_values = {
         'body_text': output_str,
         'users': users,
         'page': int(page),
         'last_page': count,
-        'base_url': request.base_url
+        'base_url': request.base_url,
+        'url_root': request.url_root
     }
     template = JINJA_ENVIRONMENT.get_template('index.html')
     return template.render(template_values)
@@ -111,19 +117,22 @@ def verified():
     else:
         users_data = json.loads(users_json)
 
-    count_verified = long(users_data['total_data'])
-    count = 1
-    if count_verified > long(nitems):
-        count = 1 + int(count_verified / long(nitems))
+    count = 0
+    users = []
+    if users_data:
+        count_verified = long(users_data['total_data'])
+        if count_verified > long(nitems):
+            count = 1 + int(count_verified / long(nitems))
 
-    users = users_data['paging_data']
+        users = users_data['paging_data']
 
     template_values = {
         'body_text': output_str,
         'users': users,
         'page': int(page),
         'last_page': count,
-        'base_url': request.base_url
+        'base_url': request.base_url,
+        'url_root': request.url_root
     }
     template = JINJA_ENVIRONMENT.get_template('index.html')
     return template.render(template_values)

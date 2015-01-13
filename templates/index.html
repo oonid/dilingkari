@@ -13,14 +13,22 @@
         <meta property="og:title" content="Lingkari Orang Indonesia yang Aktif di Google+" />
         <meta property="og:type" content="profile" />
         <meta property="og:url" content="http://di.lingkari.com/" />
-        <meta property="og:image" content="http://7langit.com/dilingkari.png" />
+        {% if "/verified" in base_url %}
+            <meta property="og:image" content="http://7langit.com/dilingkari-verified.png" />
+        {% else %}
+            <meta property="og:image" content="http://7langit.com/dilingkari.png" />
+        {% endif %}
         <meta property="og:description" content="Situs di.lingkari.com (open source) ngasih tau orang-orang Indonesia yang seru untuk diikuti karena aktif di Google+" />
         <meta property="article:author" content="https://www.facebook.com/oon.arfiandwi" />
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:creator" content="@OonID">
         <meta name="twitter:title" content="Lingkari Orang Indonesia yang Aktif di Google+">
         <meta name="twitter:description" content="Kamu ingin tahu siapa aja orang Indonesia yang seru diikuti karena aktif posting di Google+? situs di.lingkari.com (open source) ngasih tau jawabannya. Ayo cek sekarang!">
-        <meta name="twitter:image:src" content="http://7langit.com/dilingkari.png">
+        {% if "/verified" in base_url %}
+            <meta property="twitter:image:src" content="http://7langit.com/dilingkari-verified.png" />
+        {% else %}
+            <meta property="twitter:image:src" content="http://7langit.com/dilingkari.png" />
+        {% endif %}
 
         <title>dilingkari di Google+</title>
 
@@ -72,7 +80,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ base_url }}">dilingkari di Google+</a>
+                <a class="navbar-brand" href="{{ url_root }}">dilingkari di Google+</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">

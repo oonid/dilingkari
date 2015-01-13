@@ -5,7 +5,7 @@ api_version: 1
 threadsafe: yes
 
 env_variables:
-  WEB_INSTANCE: 'di.lingkari.com'
+  WEB_INSTANCE: 'dilingkari.appspot.com'
   DB_INSTANCE: 'dilingkari.appspot.com'
   API_INSTANCE: 'dilingkari.appspot.com'
 

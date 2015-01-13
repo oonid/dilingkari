@@ -18,6 +18,8 @@ Open (or create) Project on Developer Console
 
 + activate Google+ API
 
++ activate Datastore HTTP API only if Developer Console request to activate it
+
 + put the App ID to file app.yaml, section application and env_variable (URL with appspot.com)
 
 what you should do with the project files on lib directory:
